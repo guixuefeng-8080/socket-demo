@@ -7,6 +7,3 @@
 *.iml
 out
 gen
-build.gradle
-settings.gradle
-.gradle
