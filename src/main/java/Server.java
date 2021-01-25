@@ -59,28 +59,25 @@ public class Server {
             try {
                 //获取socket输出流，转打印流
                 OutputStream outputStream = socket.getOutputStream();
-                PrintStream socketPrintStream = new PrintStream(outputStream);
 
                 //获取socket输入流
                 InputStream inputStream = socket.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader socketBufferedReader = new BufferedReader(inputStreamReader);
 
                 do {
+                    byte[] buff = new byte[128];
                     //读取客户端信息
-                    String str = socketBufferedReader.readLine();
-                    if("bye".equalsIgnoreCase(str)){
-                        flag = false;
-                        socketPrintStream.println("bye");
-                    }else {
-                        //打印消息，并回送消息长度
-                        System.out.println(str);
-                        socketPrintStream.println("服务算回送： "+str.length());
+                    int length = inputStream.read(buff);
+                    if(length>0){
+                        int clientSendValue = Tools.byteArrayToInt(buff);
+                        System.out.println("服务端收到信息："+clientSendValue);
+                        if(clientSendValue==0){
+                            flag = false;
+                        }
+                        outputStream.write(buff,0,length);
                     }
-
                 }while (flag);
-                socketBufferedReader.close();
-                socketPrintStream.close();
+                outputStream.close();
+                inputStream.close();
             }catch (Exception e){
                 System.out.println("连接异常关闭~");
             }finally {
