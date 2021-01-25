@@ -30,7 +30,7 @@ public class Client {
 
     private static void initSocket(Socket socket) throws SocketException {
         //设置 读取 超时 时间
-        socket.setSoTimeout(2000);
+        socket.setSoTimeout(20000);
         //正常情况下，端口一旦被bind即使连接关闭，2min之内不能被重新bind，而设置为true的话，一旦连接完全关闭，端口就可以重新分配
         socket.setReuseAddress(true);
         //是否开启Nagle算法。优化网络空间，减少ACK次数。不是每次数据片收到后都发ACK，是攒到一定数量后一起发ACK
@@ -72,31 +72,30 @@ public class Client {
 
     private static void todo(Socket client)throws IOException{
         //构建键盘输入流
-        InputStream in  = System.in;
-        BufferedReader input = new BufferedReader(new InputStreamReader(in));
+
 
         //获取Socket输出流，转打印流
         OutputStream outputStream = client.getOutputStream();
-        PrintStream socketPrintStream = new PrintStream(outputStream);
 
         //获取Socket输入流
         InputStream inputStream = client.getInputStream();
-        BufferedReader socketBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         boolean flag = true;
         do {
-            //键盘读取一行，发送到服务器端
-            String str = input.readLine();
-            socketPrintStream.println(str);
+            byte[] buff = new byte[128];
 
+            byte[] ints = Tools.intToByteArray(23121);
+            outputStream.write(ints);
             //从服务器读取一行
-            String lineStr = socketBufferedReader.readLine();
-            if("bye".equalsIgnoreCase(lineStr)){
+            int length = inputStream.read(buff);
+            if(length>0){
+                System.out.println("收到数据长度为："+length+"内容为："+new String(buff));
                 flag = false;
-            }else {
-                System.out.println(lineStr);
+            }else{
+                System.out.println("收到空数据");
+                flag = false;
             }
         }while (flag);
-        socketPrintStream.close();
-        socketBufferedReader.close();
+        outputStream.close();
+        inputStream.close();
     }
 }
