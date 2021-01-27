@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 public class Server {
     public static final int PORT = 20000;
@@ -67,13 +68,20 @@ public class Server {
                     byte[] buff = new byte[128];
                     //读取客户端信息
                     int length = inputStream.read(buff);
+                    ByteBuffer byteBuffer = ByteBuffer.wrap(buff,0,length);
+                    byte a = byteBuffer.get();
+                    char b = byteBuffer.getChar();
+                    int c = byteBuffer.getInt();
+                    double d = byteBuffer.getDouble();
+                    float e = byteBuffer.getFloat();
+                    boolean f = byteBuffer.get()==1;
+                    int pos = byteBuffer.position();
+                    String str = new String(buff,pos,length-pos-1);
                     if(length>0){
-                        int clientSendValue = Tools.byteArrayToInt(buff);
-                        System.out.println("服务端收到信息："+clientSendValue);
-                        if(clientSendValue==0){
-                            flag = false;
-                        }
-                        outputStream.write(buff,0,length);
+                        System.out.println("收到数据：length "+length+"数量："+a+"\n"+b+"\n"+c+"\n"+d+"\n"+d+"\n"+e+"\n"+f+str);
+                        outputStream.write(length);
+                    }else {
+                        flag = false;
                     }
                 }while (flag);
                 outputStream.close();

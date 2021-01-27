@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 public class Client {
 
@@ -21,7 +22,8 @@ public class Client {
             //发送接受数据
             todo(socket);
         }catch (Exception e){
-            System.out.println("异常关闭~");
+
+            System.out.println("异常关闭~"+e.getMessage());
         }
         //资源释放
         socket.close();
@@ -83,15 +85,21 @@ public class Client {
         do {
             byte[] buff = new byte[128];
 
-            byte[] ints = Tools.intToByteArray(23121);
-            outputStream.write(ints);
-            //从服务器读取一行
-            int length = inputStream.read(buff);
-            if(length>0){
-                System.out.println("收到数据长度为："+length+"内容为："+Tools.byteArrayToInt(buff));
-            }else{
-                System.out.println("收到空数据");
-            }
+            ByteBuffer byteBuffer = ByteBuffer.wrap(buff);
+            byteBuffer.put((byte) 125);
+            byteBuffer.putChar('a');
+            byteBuffer.putInt(12);
+            byteBuffer.putDouble(12.2222222);
+            byteBuffer.putFloat(1.22f);
+            boolean result = true;
+            byteBuffer.put(result?(byte) 1:(byte)0);
+            String str = "你好";
+            byteBuffer.put(str.getBytes());
+            //byteBuffer.position():，ByteBuffer的坐标指示器。长度则 要+1
+            outputStream.write(buff,0,byteBuffer.position()+1);
+            byte[] bytes = new byte[128];
+            int data = inputStream.read(bytes);
+            System.out.println("客户端收到服务端数据：data "+data);
             flag = false;
         }while (flag);
         outputStream.close();
