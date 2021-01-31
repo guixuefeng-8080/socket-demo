@@ -8,7 +8,7 @@ import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class ServerProvider {
+public class UDPProvider {
     private static Provider PROVIDER_INSTANCE;
     public static void start(int portServer) {
         stop();

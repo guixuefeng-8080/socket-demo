@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class ClientSearcher {
+public class UPDSearcher {
 
     private static final int LISTENPORT = UDPConstants.PORT_CLIENT_RESPONSE;
     public static ServerInfo searcherServer(int timeout){
@@ -58,7 +58,7 @@ public class ClientSearcher {
     private static Listener listen(CountDownLatch receiveLatch) throws InterruptedException {
         System.out.println("UDPSearcher Listener start!");
         CountDownLatch startDownLatch = new CountDownLatch(1);
-
+                                        //202
         Listener listener = new Listener(LISTENPORT,startDownLatch,receiveLatch);
         listener.start();
         startDownLatch.await();

@@ -2,5 +2,5 @@ package constants;
 
 public class TCPConstants {
 
-    public static int PORT_SERVER = 30401;
+    public static int PORT_SERVER = 30402;
 }
