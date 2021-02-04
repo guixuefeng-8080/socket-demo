@@ -1,6 +1,7 @@
 package client;
 
 import client.bean.ServerInfo;
+import client.net.qiujuer.clink.CloseUtils;
 
 import java.io.*;
 import java.net.Inet4Address;
@@ -18,12 +19,16 @@ public class TCPClient {
         System.out.println("已经发起对服务器的连接。。");
         System.out.println("客户端信息：IP:"+socket.getLocalAddress().getHostAddress()+"\tPORT:"+socket.getLocalPort());
         System.out.println("服务端信息：IP:"+socket.getInetAddress().getHostAddress()+"\tPORT:"+socket.getPort());
-        todo(socket);
+
+        ReadHandler readHandler = new ReadHandler(socket.getInputStream());
+        readHandler.start();
+        write(socket);
+        readHandler.exit();
         socket.close();
         System.out.println("客户端已经退出链接");
     }
 
-    private static void todo(Socket socket) throws IOException {
+    private static void write(Socket socket) throws IOException {
         //键盘的输入流
         InputStream in = System.in;
         InputStreamReader inreader = new InputStreamReader(in);
@@ -31,25 +36,56 @@ public class TCPClient {
         //socket输出流
         OutputStream outputStream = socket.getOutputStream();
         PrintStream socketPrintStream = new PrintStream(outputStream);
-        //socket读取流
-        InputStream inputStream = socket.getInputStream();
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader socketBufferedReader = new BufferedReader(inputStreamReader);
-        boolean done = false;
         do {
             String str = reader.readLine();
-            socketPrintStream.println(str);
-
-            String echo = socketBufferedReader.readLine();
-            if("bye".equalsIgnoreCase(echo)){
-                done = true;
-            }else {
-                System.out.println(echo);
+            if("00bye00".equalsIgnoreCase(str)){
+                break;
             }
-
-        }while (!done);
+            socketPrintStream.println(str);
+        }while (true);
         reader.close();
         socketPrintStream.close();
-        socketBufferedReader.close();
+    }
+
+    public static class ReadHandler extends Thread{
+        private boolean done = false;
+        private InputStream inputStream;
+
+        public ReadHandler( InputStream inputStream){
+            this.inputStream = inputStream;
+        }
+        @Override
+        public void run() {
+            super.run();
+            try {
+                //得到输入流
+                InputStreamReader reader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(reader);
+                do {
+                    String str = "";
+                    try{
+                        str = bufferedReader.readLine();
+
+                    }catch (IOException e){
+                        continue;
+                    }
+                    if(str==null){
+                        System.out.println("客户端已经无法读取数据");
+                        break;
+                    } else {
+                        System.out.println("服务端收到数据："+str);
+                    }
+                }while (!done);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("链接异常关闭！");
+            }finally {
+                CloseUtils.close(inputStream);
+            }
+        }
+        public void exit(){
+            done = true;
+            CloseUtils.close(inputStream);
+        }
     }
 }
